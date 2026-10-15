@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How Monthli Works</title>
+<meta name="description" content="How Monthli turns your monthly books into a safe amount you can pay yourself.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F8F9FD; --surface:#FFFFFF; --canvas:#EDEFF7;
+  --ink:#15162A; --ink2:#3B3D55; --muted:#6F7185; --faint:#A6A8B8;
+  --border:#E3E5F0; --tint:#F0EEFF; --tint-border:#D9D4FF;
+  --primary:#6656E8; --primary-ink:#4432BC;
+  --safe:#079A86; --safe-bg:#E3F6F2;
+  --warn:#C76A12; --warn-bg:#FFF1E3;
+  --over:#D9433B; --over-bg:#FFE9E7;
+  --tax:#C83D93; --bills:#FF9A44; --buffer:#6656E8; --pockets:#079A86; --free:#15162A;
+  --code-bg:#F2F3F8;
+  --sans:"Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#11121F; --surface:#1A1B2C; --canvas:#232438;
+    --ink:#ECEDF7; --ink2:#C9CADB; --muted:#9A9CB2; --faint:#6A6C84;
+    --border:#2C2E45; --tint:#241F4A; --tint-border:#3A3370;
+    --primary:#9C90FF; --primary-ink:#B8AFFF;
+    --safe:#3CCDB6; --safe-bg:#12302C;
+    --warn:#FFB066; --warn-bg:#36260F;
+    --over:#FF7D75; --over-bg:#3A1816;
+    --tax:#E66BB4; --bills:#FFAD66; --buffer:#8F82FF; --pockets:#33C2AC; --free:#ECEDF7;
+    --code-bg:#22243A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#11121F; --surface:#1A1B2C; --canvas:#232438;
+  --ink:#ECEDF7; --ink2:#C9CADB; --muted:#9A9CB2; --faint:#6A6C84;
+  --border:#2C2E45; --tint:#241F4A; --tint-border:#3A3370;
+  --primary:#9C90FF; --primary-ink:#B8AFFF;
+  --safe:#3CCDB6; --safe-bg:#12302C;
+  --warn:#FFB066; --warn-bg:#36260F;
+  --over:#FF7D75; --over-bg:#3A1816;
+  --tax:#E66BB4; --bills:#FFAD66; --buffer:#8F82FF; --pockets:#33C2AC; --free:#ECEDF7;
+  --code-bg:#22243A;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:400 16px/1.65 var(--sans);
+  padding-inline:16px; padding-block:0 64px;
+  padding-top:env(safe-area-inset-top,0px);
+}
+[hidden]{display:none!important}
+html:not([data-lang="id"]) [lang="id"]{display:none!important}
+html[data-lang="id"] [lang="en"]{display:none!important}
+
+.wrap{max-width:740px; margin-inline:auto}
+
+/* top bar */
+.bar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:5;
+  display:flex; align-items:center; gap:12px; justify-content:space-between;
+  padding-block:12px; background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.01em}
+.mark{width:28px; height:28px; border-radius:8px; background:var(--primary); display:grid; place-items:center; color:#fff; font-size:15px; font-weight:800}
+.seg{display:flex; background:var(--canvas); border-radius:999px; padding:3px; gap:2px}
+.seg button{
+  font:600 12.5px var(--sans); color:var(--muted); background:transparent; border:0;
+  padding:5px 12px; border-radius:999px; cursor:pointer; letter-spacing:.04em;
+}
+.seg button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(20,20,40,.12)}
+button:focus-visible, a:focus-visible, input:focus-visible{outline:2px solid var(--primary); outline-offset:2px}
+
+/* hero */
+.hero{padding-block:44px 8px}
+.eyebrow{font:600 12px var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--primary)}
+h1{font-size:clamp(30px,6vw,44px); line-height:1.12; letter-spacing:-.025em; font-weight:800; margin:10px 0 14px; text-wrap:balance}
+.lede{font-size:18px; color:var(--ink2); max-width:60ch; margin:0}
+.question{
+  margin:26px 0 0; padding:18px 20px; border-radius:14px;
+  background:var(--tint); border:1px solid var(--tint-border);
+  font-size:17px; font-weight:600; color:var(--primary-ink); line-height:1.5;
+}
+
+/* sections */
+section{padding-block:36px 4px}
+h2{font-size:24px; letter-spacing:-.015em; line-height:1.25; margin:0 0 6px; font-weight:800; text-wrap:balance}
+h3{font-size:17px; margin:26px 0 6px; font-weight:700}
+p{margin:0 0 14px; max-width:65ch}
+.sub{color:var(--muted); margin-bottom:18px}
+.num{font-variant-numeric:tabular-nums}
+code,.mono{font-family:var(--mono); font-size:.86em}
+p code, li code, td code{background:var(--code-bg); padding:1px 5px; border-radius:5px}
+
+/* steps */
+.steps{list-style:none; margin:20px 0 0; padding:0; display:grid; gap:10px; counter-reset:s}
+.steps li{
+  counter-increment:s; display:grid; grid-template-columns:36px 1fr; gap:14px; align-items:start;
+  background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px;
+}
+.steps li::before{
+  content:counter(s); width:36px; height:36px; border-radius:10px; display:grid; place-items:center;
+  background:var(--tint); color:var(--primary-ink); font-weight:800;
+}
+.steps b{display:block; font-size:16px}
+.steps span{color:var(--muted); font-size:14.5px}
+
+/* rules */
+.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:18px}
+.rule{border-top:3px solid var(--primary); padding-top:10px}
+.rule b{display:block; margin-bottom:4px}
+.rule span{color:var(--muted); font-size:14.5px}
+
+/* tables */
+.tbl{overflow-x:auto; margin:14px 0 18px; border:1px solid var(--border); border-radius:12px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14.5px}
+th,td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; background:var(--canvas)}
+td.sym{font-family:var(--mono); font-weight:600; color:var(--primary-ink); white-space:nowrap}
+.plus{color:var(--safe); font-weight:700}
+.minus{color:var(--over); font-weight:700}
+
+/* formula block */
+.formula{
+  font-family:var(--mono); font-size:14px; line-height:1.9;
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:14px 18px; overflow-x:auto; white-space:pre; margin:12px 0 18px; color:var(--ink);
+}
+.formula .k{color:var(--primary-ink); font-weight:600}
+.formula .c{color:var(--faint)}
+
+/* calculator */
+.calc{
+  background:var(--surface); border:1px solid var(--border); border-radius:18px;
+  padding:20px; margin-top:18px; box-shadow:0 8px 30px -18px rgba(40,30,120,.35);
+}
+.calc-head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+.calc-head b{font-size:16px}
+.reset{font:600 13px var(--sans); color:var(--primary); background:none; border:0; cursor:pointer; padding:4px 0}
+.fields{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+.field label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px}
+.field label .mono{color:var(--primary-ink)}
+.field input{
+  width:100%; font:600 15px var(--mono); color:var(--ink); background:var(--bg);
+  border:1px solid var(--border); border-radius:10px; padding:9px 10px;
+}
+.unit{font-size:11.5px; color:var(--faint); margin-top:3px}
+
+.stack{margin:22px 0 8px}
+.stack-bar{display:flex; height:46px; border-radius:10px; overflow:hidden; background:var(--canvas)}
+.stack-bar div{height:100%; transition:flex-basis .35s ease; min-width:0}
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:10px; font-size:13px; color:var(--ink2)}
+.legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px}
+.over-note{font-size:13.5px; color:var(--over); margin-top:8px}
+
+.results{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:16px}
+.res{border-radius:12px; padding:12px 14px; background:var(--bg); border:1px solid var(--border)}
+.res .lbl{font-size:12px; font-weight:600; color:var(--muted)}
+.res .val{font:700 21px var(--mono); letter-spacing:-.02em; margin-top:2px}
+.res .how{font-size:12px; color:var(--faint); font-family:var(--mono); margin-top:2px}
+.res.hl{background:var(--tint); border-color:var(--tint-border)}
+.res.hl .val{color:var(--primary-ink)}
+
+/* zones */
+.zones{display:grid; gap:10px; margin-top:16px}
+.zone{display:grid; grid-template-columns:auto 1fr; gap:4px 14px; align-items:baseline; border-radius:12px; padding:12px 16px}
+.zone .tag{font:700 12px var(--sans); letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:999px; color:#fff; white-space:nowrap}
+.zone .rng{font-family:var(--mono); font-weight:600; font-size:14px}
+.zone p{grid-column:2; margin:0; font-size:14.5px; color:var(--ink2)}
+.z-safe{background:var(--safe-bg)} .z-safe .tag{background:var(--safe)}
+.z-warn{background:var(--warn-bg)} .z-warn .tag{background:var(--warn)}
+.z-over{background:var(--over-bg)} .z-over .tag{background:var(--over)}
+@media (max-width:480px){ .zone{grid-template-columns:1fr} .zone p{grid-column:1} }
+
+.order{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:10px 0 18px; font-size:14px; font-weight:600}
+.order span{padding:5px 11px; border-radius:999px; background:var(--canvas)}
+.order .arr{background:none; padding:0; color:var(--faint)}
+
+/* callout */
+.note{border-left:3px solid var(--primary); padding:4px 0 4px 16px; color:var(--ink2); margin:18px 0}
+
+/* two cols */
+.two{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px}
+.panel h4{margin:0 0 8px; font-size:13px; letter-spacing:.08em; text-transform:uppercase}
+.panel ul{margin:0; padding-left:18px; font-size:14.5px; color:var(--ink2)}
+.panel li{margin-bottom:6px}
+.yes h4{color:var(--safe)} .no h4{color:var(--over)}
+
+details{margin-top:12px; border:1px solid var(--border); border-radius:12px; background:var(--surface)}
+summary{cursor:pointer; padding:14px 16px; font-weight:700}
+details .in{padding:0 16px 8px}
+
+footer{margin-top:48px; padding-top:18px; border-top:1px solid var(--border); font-size:13px; color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="bar">
+  <div class="brand"><span class="mark" aria-hidden="true">M</span>Monthli</div>
+  <div class="seg" role="group" aria-label="Language">
+    <button type="button" id="btn-en" data-set="en" aria-pressed="true">EN</button>
+    <button type="button" id="btn-id" data-set="id" aria-pressed="false">ID</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="eyebrow"><span lang="en">How it works</span><span lang="id">Cara kerja</span></div>
+  <h1><span lang="en">From your monthly books to a safe salary for yourself</span><span lang="id">Dari buku bulanan ke gaji yang aman untuk dirimu</span></h1>
+  <p class="lede"><span lang="en">Monthli is built around one question, answered again every month:</span><span lang="id">Monthli dibangun untuk menjawab satu pertanyaan, setiap bulan:</span></p>
+  <p class="question"><span lang="en">“How much can I take from my business for myself without putting tax, bills or the business’s safety cushion at risk?”</span><span lang="id">“Berapa yang boleh aku ambil dari usaha untuk diriku sendiri, tanpa mengganggu pajak, tagihan, dan cadangan aman usaha?”</span></p>
+</div>
+
+<section id="flow">
+  <h2><span lang="en">One month in five steps</span><span lang="id">Satu bulan dalam lima langkah</span></h2>
+  <ol class="steps">
+    <li><div><b><span lang="en">Record</span><span lang="id">Catat</span></b><span lang="en">Write down money coming in and going out: by hand, by scanning a receipt, or by chatting with the AI.</span><span lang="id">Catat uang masuk dan keluar: manual, scan struk, atau lewat chat AI.</span></div></li>
+    <li><div><b><span lang="en">Close the month</span><span lang="id">Tutup buku</span></b><span lang="en">Tick a short checklist, then close. The month is locked so its numbers can’t change by accident.</span><span lang="id">Centang checklist singkat, lalu tutup. Bulan itu dikunci supaya angkanya tidak berubah tanpa sengaja.</span></div></li>
+    <li><div><b><span lang="en">Protect</span><span lang="id">Lindungi</span></b><span lang="en">Monthli sets aside tax, bills due, a cushion for fixed costs, and money already saved in business pockets.</span><span lang="id">Monthli menyisihkan pajak, tagihan jatuh tempo, cadangan biaya tetap, dan uang di pocket bisnis.</span></div></li>
+    <li><div><b><span lang="en">Pay yourself</span><span lang="id">Gaji dirimu</span></b><span lang="en">You see a recommended amount and a hard limit. You decide, and Monthli records what you actually took.</span><span lang="id">Kamu melihat angka rekomendasi dan batas keras. Kamu yang memutuskan, Monthli mencatat yang benar-benar diambil.</span></div></li>
+    <li><div><b><span lang="en">Fill your pockets</span><span lang="id">Isi pocket</span></b><span lang="en">What’s left can go to goals, like an emergency fund, new equipment or a holiday, in the order you choose.</span><span lang="id">Sisanya bisa masuk ke tujuan, misalnya dana darurat, alat baru, atau liburan, sesuai urutan prioritasmu.</span></div></li>
+  </ol>
+
+  <div class="rules">
+    <div class="rule"><b><span lang="en">Cash, not promises</span><span lang="id">Kas, bukan janji</span></b><span lang="en">Only money that actually arrived counts. An unpaid invoice adds Rp 0 to your cash.</span><span lang="id">Hanya uang yang sudah masuk yang dihitung. Invoice belum dibayar menambah kas Rp 0.</span></div>
+    <div class="rule"><b><span lang="en">Protected money stays put</span><span lang="id">Uang yang dilindungi tetap aman</span></b><span lang="en">Tax, bills and the cushion are counted once and never offered as salary.</span><span lang="id">Pajak, tagihan, dan cadangan dihitung sekali dan tidak pernah ditawarkan sebagai gaji.</span></div>
+    <div class="rule"><b><span lang="en">Formulas decide, AI helps</span><span lang="id">Rumus yang menentukan, AI membantu</span></b><span lang="en">Every number comes from fixed rules you can read below. AI only suggests and explains.</span><span lang="id">Setiap angka berasal dari aturan tetap yang bisa kamu baca di bawah. AI hanya menyarankan dan menjelaskan.</span></div>
+  </div>
+</section>
+
+<section id="record">
+  <h2><span lang="en">1 · Recording money</span><span lang="id">1 · Mencatat uang</span></h2>
+  <p class="sub"><span lang="en">Every entry is one of five types. All amounts are whole rupiah.</span><span lang="id">Setiap catatan termasuk salah satu dari lima jenis. Semua nominal dalam rupiah bulat.</span></p>
+  <div class="tbl"><table>
+    <thead><tr><th><span lang="en">Type</span><span lang="id">Jenis</span></th><th><span lang="en">What it is</span><span lang="id">Artinya</span></th><th><span lang="en">Cash</span><span lang="id">Kas</span></th></tr></thead>
+    <tbody>
+      <tr><td><b><span lang="en">Income</span><span lang="id">Pemasukan</span></b></td><td><span lang="en">A client pays you, or you invoice a client</span><span lang="id">Klien membayar, atau kamu menagih klien</span></td><td><span class="plus">+</span> <span lang="en">only the paid part</span><span lang="id">hanya bagian yang dibayar</span></td></tr>
+      <tr><td><b><span lang="en">Invoice payment</span><span lang="id">Pelunasan invoice</span></b></td><td><span lang="en">A later payment of an earlier invoice</span><span lang="id">Pembayaran susulan dari invoice sebelumnya</span></td><td><span class="plus">+</span> <span lang="en">full amount</span><span lang="id">penuh</span></td></tr>
+      <tr><td><b><span lang="en">Expense</span><span lang="id">Pengeluaran</span></b></td><td><span lang="en">Business spending</span><span lang="id">Belanja usaha</span></td><td><span class="minus">−</span></td></tr>
+      <tr><td><b><span lang="en">Owner pay</span><span lang="id">Prive</span></b></td><td><span lang="en">Money you take for yourself. Not a business expense.</span><span lang="id">Uang yang kamu ambil untuk pribadi. Bukan biaya usaha.</span></td><td><span class="minus">−</span></td></tr>
+      <tr><td><b><span lang="en">Tax payment</span><span lang="id">Bayar pajak</span></b></td><td><span lang="en">Tax you paid</span><span lang="id">Pajak yang sudah kamu setor</span></td><td><span class="minus">−</span></td></tr>
+    </tbody>
+  </table></div>
+  <p><span lang="en">Lines added by the AI chat carry a <b>NEW</b> badge until you confirm them. The month can’t be closed while any are left unchecked.</span><span lang="id">Catatan dari chat AI diberi tanda <b>NEW</b> sampai kamu konfirmasi. Bulan tidak bisa ditutup selama masih ada yang belum dicek.</span></p>
+</section>
+
+<section id="close">
+  <h2><span lang="en">2 · Closing the month</span><span lang="id">2 · Tutup buku</span></h2>
+  <p><span lang="en">Monthli builds the checklist from your real data. All four must be ticked:</span><span lang="id">Monthli menyusun checklist dari datamu sendiri. Keempatnya harus tercentang:</span></p>
+  <div class="tbl"><table><tbody>
+    <tr><td>✓</td><td><span lang="en">Transactions reviewed, with no unchecked AI lines</span><span lang="id">Transaksi sudah dicek, tidak ada catatan AI yang tertinggal</span></td></tr>
+    <tr><td>✓</td><td><span lang="en">Every income has a category</span><span lang="id">Semua pemasukan berkategori</span></td></tr>
+    <tr><td>✓</td><td><span lang="en">Every expense has a category</span><span lang="id">Semua pengeluaran berkategori</span></td></tr>
+    <tr><td>✓</td><td><span lang="en">No receipts missing</span><span lang="id">Tidak ada struk yang kurang</span></td></tr>
+  </tbody></table></div>
+  <p><span lang="en">Closing locks the month and saves a snapshot of its numbers. You can reopen it with a reason. Closing it again creates a new revision, and the old one stays in the audit history.</span><span lang="id">Menutup buku akan mengunci bulan itu dan menyimpan salinan angkanya. Kamu bisa membukanya lagi dengan alasan. Menutup ulang membuat revisi baru, dan revisi lama tetap ada di riwayat audit.</span></p>
+  <p class="note"><span lang="en">Closed months matter: the recommended owner pay is the average profit of your last closed months. No closed month yet means no recommendation, only the hard limit.</span><span lang="id">Bulan yang sudah ditutup itu penting: rekomendasi prive adalah rata-rata laba dari bulan-bulan terakhir yang sudah ditutup. Belum ada bulan yang ditutup berarti belum ada rekomendasi, hanya batas keras.</span></p>
+</section>
+
+<section id="owner-pay">
+  <h2><span lang="en">3 &amp; 4 · Protect, then pay yourself</span><span lang="id">3 &amp; 4 · Lindungi, lalu gaji dirimu</span></h2>
+  <p class="sub"><span lang="en">This is the heart of Monthli. Each letter below is a number the app collects for you.</span><span lang="id">Ini inti Monthli. Setiap huruf di bawah adalah angka yang dikumpulkan aplikasi untukmu.</span></p>
+
+  <div class="tbl"><table>
+    <thead><tr><th></th><th><span lang="en">Meaning</span><span lang="id">Arti</span></th><th><span lang="en">Where it comes from</span><span lang="id">Asalnya</span></th></tr></thead>
+    <tbody>
+      <tr><td class="sym">K</td><td><span lang="en">Business cash now</span><span lang="id">Kas usaha saat ini</span></td><td><span lang="en">Your latest cash check plus every record after it</span><span lang="id">Cek kas terakhir ditambah semua catatan sesudahnya</span></td></tr>
+      <tr><td class="sym">P</td><td><span lang="en">Tax reserve</span><span lang="id">Cadangan pajak</span></td><td><span lang="en">Tax set aside for last month and this month, minus tax paid this month</span><span lang="id">Sisihan pajak bulan lalu dan bulan ini, dikurangi pajak yang sudah dibayar bulan ini</span></td></tr>
+      <tr><td class="sym">H</td><td><span lang="en">Bills due this month</span><span lang="id">Tagihan bulan ini</span></td><td><span lang="en">Unpaid fixed costs and loan installments due this month</span><span lang="id">Biaya tetap dan cicilan bulan ini yang belum dibayar</span></td></tr>
+      <tr><td class="sym">B</td><td><span lang="en">Fixed costs per month</span><span lang="id">Biaya tetap per bulan</span></td><td><span lang="en">Rent, salaries, subscriptions, installments</span><span lang="id">Sewa, gaji tim, langganan, cicilan</span></td></tr>
+      <tr><td class="sym">R</td><td><span lang="en">Cushion months</span><span lang="id">Bulan cadangan</span></td><td><span lang="en">3 by default, you can choose 1 to 12. Counted from next month.</span><span lang="id">Default 3, bisa diatur 1 sampai 12. Dihitung mulai bulan depan.</span></td></tr>
+      <tr><td class="sym">S</td><td><span lang="en">Business pockets</span><span lang="id">Pocket bisnis</span></td><td><span lang="en">Money already saved in business-funded goals</span><span lang="id">Uang yang sudah ada di tujuan yang didanai usaha</span></td></tr>
+      <tr><td class="sym">L</td><td><span lang="en">Profit of a closed month</span><span lang="id">Laba bulan yang ditutup</span></td><td><span lang="en">Cash in − expenses − tax paid. Owner pay is not subtracted.</span><span lang="id">Uang masuk − pengeluaran − pajak dibayar. Prive tidak dikurangkan.</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <p><span lang="en">Tax is your own setting: a percent of the cash you collected, or a fixed amount per month. Monthli does not calculate tax law for you.</span><span lang="id">Pajak adalah pengaturanmu sendiri: persen dari uang yang benar-benar diterima, atau jumlah tetap per bulan. Monthli tidak menghitung aturan pajak untukmu.</span></p>
+
+  <h3><span lang="en">The four formulas</span><span lang="id">Empat rumus</span></h3>
+<div class="formula"><span class="k">Protected</span>    D   = P + H + (B × R) + S
+<span class="k">Hard limit</span>   M   = max(0, K − D)
+<span class="k">Avg profit</span>   Ā   = average L of the last 3 closed months
+<span class="k">Recommended</span>  Rek = max(0, min(M, Ā − owner pay already taken this month))</div>
+  <p><span lang="en"><b>M</b> is the most you can take without touching protected money. <b>Rek</b> is what the business really earns on average, never more than M, so one lucky month doesn’t become your salary.</span><span lang="id"><b>M</b> adalah jumlah terbesar yang bisa diambil tanpa menyentuh uang yang dilindungi. <b>Rek</b> adalah rata-rata yang benar-benar dihasilkan usaha, tidak pernah lebih dari M, jadi satu bulan yang kebetulan bagus tidak dianggap gaji tetap.</span></p>
+
+  <div class="calc" id="calc">
+    <div class="calc-head">
+      <b><span lang="en">Try it: the worked example</span><span lang="id">Coba sendiri: contoh hitungan</span></b>
+      <button class="reset" type="button" id="reset"><span lang="en">Reset example</span><span lang="id">Kembalikan contoh</span></button>
+    </div>
+    <div class="fields">
+      <div class="field"><label for="f-k"><span class="mono">K</span> · <span lang="en">cash</span><span lang="id">kas</span></label><input id="f-k" inputmode="numeric" value="50"><div class="unit"><span lang="en">million Rp</span><span lang="id">juta Rp</span></div></div>
+      <div class="field"><label for="f-p"><span class="mono">P</span> · <span lang="en">tax</span><span lang="id">pajak</span></label><input id="f-p" inputmode="numeric" value="2"><div class="unit"><span lang="en">million Rp</span><span lang="id">juta Rp</span></div></div>
+      <div class="field"><label for="f-h"><span class="mono">H</span> · <span lang="en">bills due</span><span lang="id">tagihan</span></label><input id="f-h" inputmode="numeric" value="3"><div class="unit"><span lang="en">million Rp</span><span lang="id">juta Rp</span></div></div>
+      <div class="field"><label for="f-b"><span class="mono">B</span> · <span lang="en">fixed / month</span><span lang="id">tetap / bulan</span></label><input id="f-b" inputmode="numeric" value="10"><div class="unit"><span lang="en">million Rp</span><span lang="id">juta Rp</span></div></div>
+      <div class="field"><label for="f-r"><span class="mono">R</span> · <span lang="en">cushion</span><span lang="id">cadangan</span></label><input id="f-r" inputmode="numeric" value="3"><div class="unit"><span lang="en">months</span><span lang="id">bulan</span></div></div>
+      <div class="field"><label for="f-s"><span class="mono">S</span> · <span lang="en">pockets</span><span lang="id">pocket</span></label><input id="f-s" inputmode="numeric" value="5"><div class="unit"><span lang="en">million Rp</span><span lang="id">juta Rp</span></div></div>
+      <div class="field"><label for="f-l"><span class="mono">L</span> · <span lang="en">last 3 profits</span><span lang="id">3 laba terakhir</span></label><input id="f-l" value="12, 18, 15"><div class="unit"><span lang="en">million Rp, comma-separated</span><span lang="id">juta Rp, pisahkan koma</span></div></div>
+    </div>
+
+    <div class="stack" aria-hidden="true">
+      <div class="stack-bar" id="bar"></div>
+      <div class="legend">
+        <span><i style="background:var(--tax)"></i><span lang="en">Tax</span><span lang="id">Pajak</span></span>
+        <span><i style="background:var(--bills)"></i><span lang="en">Bills</span><span lang="id">Tagihan</span></span>
+        <span><i style="background:var(--buffer)"></i><span lang="en">Cushion B×R</span><span lang="id">Cadangan B×R</span></span>
+        <span><i style="background:var(--pockets)"></i><span lang="en">Pockets</span><span lang="id">Pocket</span></span>
+        <span><i style="background:var(--free)"></i><span lang="en">Free to take (M)</span><span lang="id">Boleh diambil (M)</span></span>
+      </div>
+      <div class="over-note" id="over" hidden></div>
+    </div>
+
+    <div class="results" aria-live="polite">
+      <div class="res"><div class="lbl"><span lang="en">Protected</span><span lang="id">Dilindungi</span> D</div><div class="val num" id="o-d"></div><div class="how" id="h-d"></div></div>
+      <div class="res"><div class="lbl"><span lang="en">Hard limit</span><span lang="id">Batas keras</span> M</div><div class="val num" id="o-m"></div><div class="how" id="h-m"></div></div>
+      <div class="res"><div class="lbl"><span lang="en">Avg profit</span><span lang="id">Rata-rata laba</span> Ā</div><div class="val num" id="o-a"></div><div class="how" id="h-a"></div></div>
+      <div class="res hl"><div class="lbl"><span lang="en">Recommended</span><span lang="id">Rekomendasi</span></div><div class="val num" id="o-r"></div><div class="how" id="h-r"></div></div>
+    </div>
+  </div>
+
+  <h3><span lang="en">When you record owner pay of x</span><span lang="id">Saat kamu mencatat prive sebesar x</span></h3>
+  <div class="zones">
+    <div class="zone z-safe"><span class="tag"><span lang="en">Safe</span><span lang="id">Aman</span></span><span class="rng">x ≤ Rek</span><p><span lang="en">Recorded right away.</span><span lang="id">Langsung tercatat.</span></p></div>
+    <div class="zone z-warn"><span class="tag"><span lang="en">Above</span><span lang="id">Di atas saran</span></span><span class="rng">Rek &lt; x ≤ M</span><p><span lang="en">Monthli asks you to confirm.</span><span lang="id">Monthli meminta konfirmasi.</span></p></div>
+    <div class="zone z-over"><span class="tag"><span lang="en">Over limit</span><span lang="id">Lewat batas</span></span><span class="rng">x &gt; M</span><p><span lang="en">Confirm, add an optional reason, and it goes into the audit log. Home then shows “Refill Rp (x − M)”.</span><span lang="id">Konfirmasi, isi alasan (opsional), lalu masuk log audit. Home akan menampilkan “Isi kembali Rp (x − M)”.</span></p></div>
+  </div>
+  <p style="margin-top:14px"><span lang="en">Monthli never blocks you. It doesn’t hold your money, and your books must match your bank. Going over the limit uses protected money in this order, with tax last:</span><span lang="id">Monthli tidak pernah memblokir. Monthli tidak memegang uangmu, dan buku harus sama dengan rekening. Kalau lewat batas, uang yang dilindungi terpakai dengan urutan ini, pajak paling akhir:</span></p>
+  <div class="order">
+    <span><span lang="en">Cushion</span><span lang="id">Cadangan</span></span><span class="arr">→</span>
+    <span><span lang="en">Business pockets</span><span lang="id">Pocket bisnis</span></span><span class="arr">→</span>
+    <span><span lang="en">Bills</span><span lang="id">Tagihan</span></span><span class="arr">→</span>
+    <span><span lang="en">Tax</span><span lang="id">Pajak</span></span>
+  </div>
+  <p><span lang="en">There’s one more warning. If this year’s total owner pay is more than this year’s total profit, Monthli tells you your business capital is shrinking.</span><span lang="id">Ada satu peringatan lagi. Kalau total prive tahun ini lebih besar dari total laba tahun ini, Monthli memberi tahu bahwa modal usahamu berkurang.</span></p>
+
+  <details>
+    <summary><span lang="en">Why nothing is counted twice</span><span lang="id">Kenapa tidak ada yang dihitung dua kali</span></summary>
+    <div class="in">
+      <p><span lang="en">This month’s fixed costs sit in H. The cushion B × R starts next month.</span><span lang="id">Biaya tetap bulan ini ada di H. Cadangan B × R mulai dari bulan depan.</span></p>
+      <p><span lang="en">A bill you already paid has already left K, so H no longer includes it. The same goes for tax already paid and P.</span><span lang="id">Tagihan yang sudah dibayar sudah keluar dari K, jadi tidak lagi dihitung di H. Begitu juga pajak yang sudah dibayar dan P.</span></p>
+      <p><span lang="en">Recording owner pay lowers K, which lowers M. It is also subtracted from the recommendation, so the same amount can’t be offered again.</span><span lang="id">Mencatat prive menurunkan K, sehingga M ikut turun. Prive juga dikurangkan dari rekomendasi, jadi jumlah yang sama tidak ditawarkan lagi.</span></p>
+    </div>
+  </details>
+</section>
+
+<section id="pockets">
+  <h2><span lang="en">5 · Goal pockets (Dream Vault)</span><span lang="id">5 · Pocket tujuan (Dream Vault)</span></h2>
+  <p><span lang="en">A pocket is a label on money you already have. It never creates new money, and saving into one doesn’t change your income, expenses or profit.</span><span lang="id">Pocket adalah label untuk uang yang sudah kamu punya. Pocket tidak menciptakan uang baru, dan menabung ke pocket tidak mengubah pemasukan, pengeluaran, atau laba.</span></p>
+<div class="formula">balance = opening + deposits − withdrawals − spending   <span class="c">(never below 0)</span></div>
+
+  <div class="tbl"><table>
+    <thead><tr><th><span lang="en">Goal type</span><span lang="id">Jenis tujuan</span></th><th><span lang="en">Needs each month</span><span lang="id">Kebutuhan per bulan</span></th></tr></thead>
+    <tbody>
+      <tr><td><b><span lang="en">Emergency fund</span><span lang="id">Dana darurat</span></b></td><td><span lang="en">remaining ÷ months to build it</span><span lang="id">sisa ÷ lama membangunnya</span></td></tr>
+      <tr><td><b><span lang="en">Dated target</span><span lang="id">Target bertanggal</span></b></td><td><span lang="en">remaining ÷ months until the date</span><span lang="id">sisa ÷ bulan sampai tanggal target</span></td></tr>
+      <tr><td><b><span lang="en">Business asset</span><span lang="id">Aset usaha</span></b></td><td><span lang="en">your planned monthly deposit. It slows down when profit drops 15–30% and pauses at 30% or more.</span><span lang="id">setoran bulanan yang direncanakan. Melambat saat laba turun 15–30%, berhenti sementara kalau turun 30% atau lebih.</span></td></tr>
+      <tr><td><b><span lang="en">Wishlist</span><span lang="id">Wishlist</span></b></td><td><span lang="en">whatever is left after higher priorities</span><span lang="id">sisa setelah prioritas yang lebih tinggi</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span lang="en">Two budgets that never mix</span><span lang="id">Dua anggaran yang tidak pernah tercampur</span></h3>
+  <div class="two">
+    <div class="panel"><h4 style="color:var(--primary-ink)"><span lang="en">Business</span><span lang="id">Bisnis</span></h4><p style="margin:0;font-size:14.5px"><span lang="en">Up to <b>M</b>. A deposit raises S, which lowers M, so pockets and owner pay can never use the same rupiah.</span><span lang="id">Maksimal <b>M</b>. Setoran menaikkan S, sehingga M turun. Pocket dan prive tidak bisa memakai rupiah yang sama.</span></p></div>
+    <div class="panel"><h4 style="color:var(--safe)"><span lang="en">Personal</span><span lang="id">Pribadi</span></h4><p style="margin:0;font-size:14.5px"><span lang="en">Up to the owner pay you <b>actually recorded</b> this month, minus personal deposits already made. A recommendation isn’t money yet.</span><span lang="id">Maksimal prive yang <b>benar-benar dicatat</b> bulan ini, dikurangi setoran pribadi yang sudah dilakukan. Rekomendasi belum berarti uang.</span></p></div>
+  </div>
+  <p style="margin-top:16px"><span lang="en">Each budget fills its goals from highest priority down:</span><span lang="id">Setiap anggaran mengisi tujuannya dari prioritas tertinggi:</span></p>
+<div class="formula">deposit = min(monthly need, remaining target, budget left)</div>
+  <p><span lang="en">You review and edit, then confirm. Only one confirmed allocation is allowed per month.</span><span lang="id">Kamu cek dan ubah, lalu konfirmasi. Hanya satu alokasi yang boleh dikonfirmasi per bulan.</span></p>
+</section>
+
+<section id="ai">
+  <h2><span lang="en">Where AI fits</span><span lang="id">Peran AI</span></h2>
+  <div class="two">
+    <div class="panel yes"><h4><span lang="en">AI can</span><span lang="id">AI boleh</span></h4><ul>
+      <li><span lang="en">Suggest entries from your text or a photo</span><span lang="id">Menyarankan catatan dari teks atau foto</span></li>
+      <li><span lang="en">Look over a month for duplicates or odd items</span><span lang="id">Memeriksa duplikat atau transaksi janggal</span></li>
+      <li><span lang="en">Explain results in plain words</span><span lang="id">Menjelaskan hasil dengan bahasa sederhana</span></li>
+    </ul></div>
+    <div class="panel no"><h4><span lang="en">AI never</span><span lang="id">AI tidak pernah</span></h4><ul>
+      <li><span lang="en">Saves anything without your tap</span><span lang="id">Menyimpan apa pun tanpa kamu tekan</span></li>
+      <li><span lang="en">Calculates cash, tax, owner pay or pockets</span><span lang="id">Menghitung kas, pajak, prive, atau pocket</span></li>
+      <li><span lang="en">Records owner pay for you</span><span lang="id">Mencatat prive untukmu</span></li>
+    </ul></div>
+  </div>
+  <p style="margin-top:14px"><span lang="en">Your books stay on your phone. Data leaves only when you use an AI feature (after you agree) or export a backup yourself. The whole app works with AI switched off.</span><span lang="id">Pembukuanmu tersimpan di HP. Data hanya keluar saat kamu memakai fitur AI (setelah setuju) atau mengekspor cadangan sendiri. Seluruh aplikasi tetap jalan tanpa AI.</span></p>
+</section>
+
+<section id="month">
+  <h2><span lang="en">A month, start to finish</span><span lang="id">Satu bulan, dari awal sampai akhir</span></h2>
+  <div class="tbl"><table><tbody>
+    <tr><td><b><span lang="en">During the month</span><span lang="id">Selama sebulan</span></b></td><td><span lang="en">Add income and expenses</span><span lang="id">Catat pemasukan dan pengeluaran</span></td></tr>
+    <tr><td><b><span lang="en">Month end</span><span lang="id">Akhir bulan</span></b></td><td><span lang="en">Close → finish the checklist → Close month</span><span lang="id">Tutup buku → selesaikan checklist → Tutup bulan</span></td></tr>
+    <tr><td><b>Owner Pay</b></td><td><span lang="en">See the recommendation and limit, then record what you take</span><span lang="id">Lihat rekomendasi dan batas, lalu catat yang kamu ambil</span></td></tr>
+    <tr><td><b>Dream Vault</b></td><td><span lang="en">Allocate → review both budgets → Confirm</span><span lang="id">Alokasikan → cek kedua anggaran → Konfirmasi</span></td></tr>
+    <tr><td><b>Home</b></td><td><span lang="en">Your next safe number, plus “Refill” if you went over</span><span lang="id">Angka aman berikutnya, plus “Isi kembali” kalau kamu lewat batas</span></td></tr>
+  </tbody></table></div>
+
+  <details>
+    <summary><span lang="en">For developers: where this lives in the code</span><span lang="id">Untuk developer: lokasinya di kode</span></summary>
+    <div class="in"><div class="tbl" style="margin-top:0"><table><tbody>
+      <tr><td><span lang="en">Owner pay formulas</span><span lang="id">Rumus prive</span></td><td><code>lib/logic/owner_pay_calculator.dart</code></td></tr>
+      <tr><td><span lang="en">Where K, P, H, B, L come from</span><span lang="id">Asal K, P, H, B, L</span></td><td><code>lib/logic/owner_pay_inputs.dart</code></td></tr>
+      <tr><td><span lang="en">Puts a month together</span><span lang="id">Menyatukan satu bulan</span></td><td><code>lib/providers/owner_pay_snapshot.dart</code></td></tr>
+      <tr><td><span lang="en">Close checklist</span><span lang="id">Checklist tutup buku</span></td><td><code>lib/logic/close_checklist_service.dart</code></td></tr>
+      <tr><td><span lang="en">Goals and waterfall</span><span lang="id">Tujuan dan waterfall</span></td><td><code>lib/logic/dream_calculator.dart</code></td></tr>
+      <tr><td><span lang="en">One allocation per month</span><span lang="id">Satu alokasi per bulan</span></td><td><code>lib/providers/dream_goal_provider.dart</code></td></tr>
+    </tbody></table></div></div>
+  </details>
+</section>
+
+<footer>
+  <span lang="en">Policy <span class="mono">owner-pay-policy v1</span>. Monthli is a recordkeeping tool, not a tax adviser. Updated 15 October 2026.</span>
+  <span lang="id">Kebijakan <span class="mono">owner-pay-policy v1</span>. Monthli adalah alat pencatatan, bukan konsultan pajak. Diperbarui 15 Oktober 2026.</span>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  function setLang(l){
+    root.setAttribute('data-lang', l);
+    root.setAttribute('lang', l);
+    document.getElementById('btn-en').setAttribute('aria-pressed', l==='en');
+    document.getElementById('btn-id').setAttribute('aria-pressed', l==='id');
+    try{ localStorage.setItem('monthli-guide-lang', l); }catch(e){}
+  }
+  var start = 'en';
+  var h = (location.hash||'').replace('#','').toLowerCase();
+  if (h === 'id' || h === 'en') start = h;
+  else { try{ var s = localStorage.getItem('monthli-guide-lang'); if (s==='id'||s==='en') start = s; }catch(e){} }
+  setLang(start);
+  document.querySelectorAll('[data-set]').forEach(function(b){
+    b.addEventListener('click', function(){ setLang(b.getAttribute('data-set')); });
+  });
+
+  var ids = ['k','p','h','b','r','s','l'];
+  var defaults = {k:'50',p:'2',h:'3',b:'10',r:'3',s:'5',l:'12, 18, 15'};
+  function num(id){ var v = parseFloat(String(document.getElementById('f-'+id).value).replace(',','.')); return isFinite(v) && v > 0 ? v : 0; }
+  function fmt(v){ return 'Rp ' + (Math.round(v*10)/10).toLocaleString('id-ID') + ' jt'; }
+  function calc(){
+    var K = parseFloat(document.getElementById('f-k').value.replace(',','.')); if(!isFinite(K)) K = 0;
+    var P = num('p'), H = num('h'), B = num('b'), S = num('s');
+    var R = Math.max(1, Math.floor(num('r')) || 1);
+    var L = document.getElementById('f-l').value.split(/[,;\s]+/).map(function(x){return parseFloat(x);}).filter(function(x){return isFinite(x);}).slice(-3);
+    var buf = B*R, D = P + H + buf + S, M = Math.max(0, K - D);
+    var A = L.length ? Math.floor(L.reduce(function(a,b){return a+b;},0)/L.length*10)/10 : null;
+    var Rek = A === null ? null : Math.max(0, Math.min(M, A));
+    document.getElementById('o-d').textContent = fmt(D);
+    document.getElementById('h-d').textContent = P+' + '+H+' + '+B+'×'+R+' + '+S;
+    document.getElementById('o-m').textContent = fmt(M);
+    document.getElementById('h-m').textContent = 'max(0, '+K+' − '+D+')';
+    document.getElementById('o-a').textContent = A === null ? '—' : fmt(A);
+    document.getElementById('h-a').textContent = L.length ? '('+L.join(' + ')+') ÷ '+L.length : '';
+    document.getElementById('o-r').textContent = Rek === null ? '—' : fmt(Rek);
+    document.getElementById('h-r').textContent = Rek === null ? '' : 'min('+M+', '+A+')';
+
+    var total = Math.max(K, D, 0.0001);
+    var parts = [['--tax',P],['--bills',H],['--buffer',buf],['--pockets',S],['--free',M]];
+    var bar = document.getElementById('bar'); bar.innerHTML = '';
+    parts.forEach(function(p){
+      if (p[1] <= 0) return;
+      var d = document.createElement('div');
+      d.style.flex = '0 0 ' + (p[1]/total*100) + '%';
+      d.style.background = 'var(' + p[0] + ')';
+      d.style.borderRight = '2px solid var(--surface)';
+      bar.appendChild(d);
+    });
+    var over = document.getElementById('over');
+    if (D > K) {
+      over.hidden = false;
+      var gap = Math.round((D-K)*10)/10;
+      over.innerHTML = '<span lang="en">Cash is Rp '+gap+' jt short of the protected money, so M = 0.</span><span lang="id">Kas kurang Rp '+gap+' jt dari uang yang dilindungi, jadi M = 0.</span>';
+    } else over.hidden = true;
+  }
+  ids.forEach(function(id){ document.getElementById('f-'+id).addEventListener('input', calc); });
+  document.getElementById('reset').addEventListener('click', function(){
+    ids.forEach(function(id){ document.getElementById('f-'+id).value = defaults[id]; }); calc();
+  });
+  calc();
+})();
+</script>
+</body>
+</html>
